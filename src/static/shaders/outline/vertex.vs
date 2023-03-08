@@ -1,0 +1,39 @@
+/**
+  -------------- outline vertex shader -------------
+  original author: Richman Stewart
+  simple vertex shader that sets the position
+  to the specified matrix and position while
+  passing the vertex colour and tex coords
+  to the fragment shader
+**/
+
+attribute vec4 aVertexPosition;
+attribute vec3 aVertexNormal;
+attribute vec2 aTextureCoord;
+
+uniform mat4 uNormalMatrix;
+uniform mat4 uModelViewMatrix;
+uniform mat4 uProjectionMatrix;
+
+varying highp vec2 vTextureCoord;
+varying highp vec3 vLighting;
+
+void main() {
+  gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+  vTextureCoord = aTextureCoord;
+
+  // Applying lighting effect
+  highp vec3 ambientLight = vec3(0.3, 0.3, 0.3);
+  highp vec3 directionalLightColor = vec3(1, 1, 1);
+  highp vec3 directionalVector = normalize(vec3(0.85, 0.8, 0.75));
+
+  // Transform the normal based on current orientation of the cube
+  highp vec4 transformedNormal = uNormalMatrix * vec4(aVertexNormal, 1.0);
+
+  highp float directional = max(
+    dot(transformedNormal.xyz, directionalVector),
+    0.0
+  );
+  // Compute the lighting needed per vertex
+  vLighting = ambientLight + (directionalLightColor * directional);
+}
